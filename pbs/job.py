@@ -44,7 +44,7 @@ class Job(object):  #pylint: disable=too-many-instance-attributes
 
 
     def __init__(self, name="STDIN", account=None, nodes=None, ppn=None, walltime=None, #pylint: disable=too-many-arguments, too-many-locals
-                 pmem=None, qos=None, queue=None, exetime=None, message="a", email=None,
+                 pmem=None, qos=None, queue=None, constraint=None, exetime=None, message="a", email=None,
                  priority="0", command=None, auto=False, substr=None, software=None):
 
         if substr != None:
@@ -90,6 +90,9 @@ class Job(object):  #pylint: disable=too-many-instance-attributes
 
         # queue string
         self.queue = queue
+
+        # queue string
+        self.constraint = constraint
 
         # time eligible for execution
         # PBS -a exetime
@@ -162,9 +165,11 @@ class Job(object):  #pylint: disable=too-many-instance-attributes
                 if 'a' in self.message:
                     jobstr += "#SBATCH --mail-type=FAIL\n"
             # SLURM does assignment to no. of nodes automatically
-            # jobstr += "#SBATCH -N {0}\n".format(self.nodes)
+            jobstr += "#SBATCH -N {0}\n".format(self.nodes)
             if self.queue is not None:
                 jobstr += "#SBATCH -p {0}\n".format(self.queue)
+            if self.constraint is not None:
+                jobstr += "#SBATCH -C {0}\n".format(self.constraint)
             jobstr += "{0}\n".format(self.command)
 
             return jobstr
